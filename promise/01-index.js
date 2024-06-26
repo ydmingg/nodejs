@@ -10,27 +10,39 @@ class myPromise {
     #result; 
     // 创建一个变量用来记录promise的状态
     #status = PROMISE_STATE.PENDING; 
-    // 创建一个数组用来存储回调函数
-    #callbacks
 
     constructor(executor) { 
         executor(this.#resolve.bind(this));
     }
-
+    // resolve方法
     #resolve(value) { 
+        // 判断状态是否为pending
+        if (this.#status !== PROMISE_STATE.PENDING) return;
         this.#result = value
+        // 将状态改为fulfilled
+        this.#status = PROMISE_STATE.FULFILLED
+    
     }
-
+    // then方法
     then(onFulfilled, onRejected) { 
-        onFulfilled(this.#result)
+        if (this.#status === PROMISE_STATE.FULFILLED) { 
+            /* 
+            * 问题：
+            * 1.此时，then只能读取已经存储进promise的结果，而不能读取异步操作存储的数据
+            */
+
+            onFulfilled(this.#result)
+        }
     }
 
 }
 
 
 const promise = new myPromise((resolve, reject) => {
-    resolve('调用成功111111');
-    resolve('调用成功222222');
+    // 1. 执行异步操作时，此时调用（then）不成功
+    setTimeout(() => {
+        resolve('调用成功');
+    }, 1000);
 })
 
 promise.then((result) => { 
